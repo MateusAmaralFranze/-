@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado ENEM — Você já mandaria bem no seu curso dos sonhos?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F6;
+    --card:#FFFFFF;
+    --ink:#1B2A4A;
+    --ink-soft:#51628A;
+    --ink-faint:#8A96B5;
+    --line:#D7DCE9;
+    --gold:#E3A527;
+    --gold-soft:#FBEECB;
+    --correct:#2E9E6E;
+    --correct-soft:#DFF3EA;
+    --wrong:#D8483F;
+    --wrong-soft:#FBE4E2;
+    --shadow: 0 1px 2px rgba(27,42,74,0.06), 0 8px 24px rgba(27,42,74,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:32px 20px 80px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:28px;
+  }
+  .brand-mark{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand-mark::before{
+    content:"";
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--gold);
+    box-shadow:0 0 0 3px var(--gold-soft);
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:36px;
+  }
+  @media (max-width:600px){
+    .card{padding:24px;}
+    .wrap{padding:20px 14px 60px;}
+  }
+
+  .screen{display:none;}
+  .screen.active{display:block; animation:rise .5s ease both;}
+  @keyframes rise{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:600;
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(28px,4.5vw,40px);
+    line-height:1.12;
+    margin:0 0 14px;
+    letter-spacing:-.01em;
+  }
+  .lede{
+    color:var(--ink-soft);
+    font-size:16px;
+    line-height:1.6;
+    max-width:56ch;
+    margin:0 0 30px;
+  }
+  .area-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:520px){
+    .area-grid{grid-template-columns:1fr;}
+  }
+  .area-card{
+    text-align:left;
+    cursor:pointer;
+    border:1px solid var(--line);
+    background:var(--paper);
+    border-radius:14px;
+    padding:20px 18px;
+    position:relative;
+    overflow:hidden;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    font-family:inherit;
+  }
+  .area-card::before{
+    content:"";
+    position:absolute; top:0; left:0; bottom:0;
+    width:6px;
+    background:var(--spine, var(--ink));
+  }
+  .area-card:hover{
+    transform:translateY(-3px);
+    box-shadow:var(--shadow);
+    border-color:var(--ink-faint);
+  }
+  .area-card .num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+    display:block;
+    margin-bottom:8px;
+  }
+  .area-card .name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:19px;
+    display:block;
+    margin-bottom:6px;
+  }
+  .area-card .desc{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+
+  .quiz-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:22px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .quiz-area-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .sheet-progress{
+    display:flex;
+    gap:6px;
+  }
+  .sheet-dot{
+    width:14px; height:14px;
+    border-radius:50%;
+    border:1.6px solid var(--line);
+    background:transparent;
+  }
+  .sheet-dot.done{
+    background:var(--ink);
+    border-color:var(--ink);
+  }
+  .sheet-dot.current{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px var(--gold-soft);
+  }
+  .q-counter{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--ink-faint);
+    margin-bottom:10px;
+  }
+  .q-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:var(--ink);
+    background:var(--gold-soft);
+    padding:3px 9px;
+    border-radius:999px;
+  }
+  .q-text{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(19px,3vw,23px);
+    line-height:1.4;
+    margin:0 0 26px;
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:28px;
+  }
+  .option{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border:1.6px solid var(--line);
+    background:var(--card);
+    border-radius:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    text-align:left;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .option:hover{border-color:var(--ink-faint);}
+  .option .bubble{
+    flex:0 0 auto;
+    width:30px;height:30px;
+    border-radius:50%;
+    border:2px solid var(--ink-faint);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:13px;
+    color:var(--ink-faint);
+    transition:all .15s ease;
+  }
+  .option.selected{
+    border-color:var(--ink);
+    background:var(--paper);
+  }
+  .option.selected .bubble{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#fff;
+  }
+  .quiz-actions{
+    display:flex;
+    justify-content:flex-end;
+  }
+  .btn{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    border-radius:10px;
+    padding:13px 26px;
+    cursor:pointer;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-primary{
+    background:var(--ink);
+    color:#fff;
+  }
+  .btn-primary:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+  }
+  .btn-gold{
+    background:var(--gold);
+    color:var(--ink);
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1.6px solid var(--line);
+  }
+
+  .result-top{
+    display:flex;
+    align-items:flex-end;
+    gap:22px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+  }
+  .score-big{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:64px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:-.02em;
+  }
+  .score-of{
+    font-size:22px;
+    color:var(--ink-faint);
+    font-weight:500;
+  }
+  .score-tag{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:6px 12px;
+    border-radius:999px;
+    font-weight:600;
+    margin-bottom:8px;
+    display:inline-block;
+  }
+  .tag-baixo{background:var(--wrong-soft); color:var(--wrong);}
+  .tag-medio{background:var(--gold-soft); color:#8a6a10;}
+  .tag-bom{background:var(--correct-soft); color:var(--correct);}
+  .result-msg{
+    color:var(--ink-soft);
+    line-height:1.6;
+    font-size:15.5px;
+    margin:14px 0 30px;
+    max-width:56ch;
+  }
+  .stat-row{
+    display:flex;
+    gap:24px;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+  }
+  .stat{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .stat .dot{width:10px;height:10px;border-radius:50%;}
+  .stat b{color:var(--ink); font-size:16px;}
+
+  .answer-sheet{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+    margin-bottom:32px;
+  }
+  @media (max-width:480px){
+    .answer-sheet{grid-template-columns:repeat(5,1fr); gap:6px;}
+  }
+  .sheet-cell{
+    border:1.6px solid var(--line);
+    border-radius:10px;
+    padding:10px 6px;
+    text-align:center;
+    background:var(--paper);
+  }
+  .sheet-cell .qn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    color:var(--ink-faint);
+    display:block;
+    margin-bottom:5px;
+    text-transform:uppercase;
+    letter-spacing:.02em;
+  }
+  .sheet-cell .mark{
+    width:26px;height:26px;
+    margin:0 auto;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:12px;
+    border:2px solid var(--line);
+  }
+  .sheet-cell.right .mark{
+    background:var(--correct-soft);
+    border-color:var(--correct);
+    color:var(--correct);
+  }
+  .sheet-cell.wrong .mark{
+    background:var(--wrong-soft);
+    border-color:var(--wrong);
+    color:var(--wrong);
+  }
+
+  .offer{
+    border:1.6px solid var(--ink);
+    border-radius:16px;
+    padding:26px;
+    background:linear-gradient(180deg, #fff, var(--paper));
+    margin-bottom:16px;
+  }
+  .offer-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .offer h3{
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    margin:0 0 10px;
+  }
+  .offer p{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.6;
+    margin:0 0 18px;
+  }
+  .offer-price{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .offer-price .now{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:30px;
+    font-weight:600;
+  }
+  .offer-price .was{
+    font-size:15px;
+    color:var(--ink-faint);
+    text-decoration:line-through;
+  }
+  .offer-list{
+    list-style:none;
+    padding:0; margin:0 0 20px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .offer-list li{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    display:flex;
+    gap:8px;
+  }
+  .offer-list li::before{
+    content:"✓";
+    color:var(--correct);
+    font-weight:700;
+  }
+  .crosssell{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-faint);
+    margin-top:6px;
+  }
+  .crosssell a{
+    color:var(--ink);
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+  .restart{
+    text-align:center;
+    margin-top:22px;
+  }
+  .restart a{
+    font-size:13px;
+    color:var(--ink-faint);
+    cursor:pointer;
+    text-decoration:underline;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-mark">Simulado de nível · ENEM</div>
+    <div class="brand-mark" style="font-size:11px;">10 questões</div>
+  </div>
+
+  <div class="card">
+
+    <!-- ================= INTRO ================= -->
+    <section id="screen-intro" class="screen active">
+      <p class="eyebrow">Antes de estudar, descubra onde você está</p>
+      <h1>Sua nota já chega no curso dos seus sonhos?</h1>
+      <p class="lede">Escolhe o curso que você quer fazer. A gente monta um mini-simulado com as matérias que mais pesam pra ele, no estilo que cai de verdade na prova — e no final você vê exatamente onde está pegando.</p>
+
+      <div class="area-grid" id="area-grid"></div>
+    </section>
+
+    <!-- ================= QUIZ ================= -->
+    <section id="screen-quiz" class="screen">
+      <div class="quiz-top">
+        <span class="quiz-area-label" id="quiz-area-label">Medicina</span>
+        <div class="sheet-progress" id="sheet-progress"></div>
+      </div>
+      <div class="q-counter">
+        <span id="q-counter-text">Questão 1 de 10</span>
+        <span class="q-tag" id="q-tag">Biologia</span>
+      </div>
+      <p class="q-text" id="q-text"></p>
+      <div class="options" id="options"></div>
+      <div class="quiz-actions">
+        <button class="btn btn-primary" id="btn-next" disabled>Próxima questão</button>
+      </div>
+    </section>
+
+    <!-- ================= RESULT ================= -->
+    <section id="screen-result" class="screen">
+      <span class="score-tag" id="score-tag">NÍVEL</span>
+      <div class="result-top">
+        <span class="score-big" id="score-big">0</span>
+        <span class="score-of">de 10 questões</span>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><span class="dot" style="background:var(--correct)"></span> <b id="stat-right">0</b> acertos</div>
+        <div class="stat"><span class="dot" style="background:var(--wrong)"></span> <b id="stat-wrong">0</b> erros</div>
+      </div>
+      <p class="result-msg" id="result-msg"></p>
+
+      <div class="answer-sheet" id="answer-sheet"></div>
+
+      <div class="offer" id="offer-block">
+        <div class="offer-eyebrow" id="offer-eyebrow">Recomendado pra você</div>
+        <h3 id="offer-title">Bloco de 50 questões comentadas</h3>
+        <p id="offer-desc">Questões no mesmo estilo das que você acabou de responder, com resolução comentada passo a passo — focadas exatamente nos pontos em que você mais errou.</p>
+        <div class="offer-price">
+          <span class="now">R$17</span>
+          <span class="was">R$47</span>
+        </div>
+        <ul class="offer-list">
+          <li>50 questões comentadas, no estilo do curso escolhido</li>
+          <li>Correção explicada item por item</li>
+          <li>Acesso imediato após o pagamento</li>
+        </ul>
+        <button class="btn btn-gold" style="width:100%;" onclick="goToCheckout()">Quero destravar meu nível →</button>
+      </div>
+
+      <p class="crosssell" id="crosssell"></p>
+
+      <div class="restart">
+        <a onclick="restart()">Testar outro curso</a>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG — troque cada "#" pelo link real do seu checkout
+   (Kiwify / Hotmart / Braip / Cakto), um por curso.
+   ========================================================= */
+const CHECKOUT_LINKS = {
+  medicina: "#",
+  engenharia: "#",
+  economia: "#",
+  direito: "#"
+};
+
+/* =========================================================
+   CURSOS (o que aparece na tela inicial)
+   ========================================================= */
+const COURSES = [
+  {
+    id: "medicina",
+    name: "Medicina",
+    desc: "Biologia, química e interpretação de texto pesam mais",
+    spine: "#2E9E6E"
+  },
+  {
+    id: "engenharia",
+    name: "Engenharia",
+    desc: "Matemática e física puxam a nota pra cima ou pra baixo",
+    spine: "#D8483F"
+  },
+  {
+    id: "economia",
+    name: "Economia",
+    desc: "Matemática, atualidades e leitura de texto na medida certa",
+    spine: "#8a6a10"
+  },
+  {
+    id: "direito",
+    name: "Direito",
+    desc: "Interpretação, redação e humanas fazem toda a diferença",
+    spine: "#1B2A4A"
+  }
+];
+
+/* =========================================================
+   BANCO DE QUESTÕES POR MATÉRIA
+   cada questão tem uma "tag" (matéria) usada como selo
+   ========================================================= */
+const SUBJECT_BANK = {
+  portugues: [
+    { tag:"Português", q:"Em 'Embora estivesse cansado, o atleta terminou a corrida', o conectivo destacado estabelece relação de:", opts:["Causa","Concessão","Consequência","Condição","Finalidade"], correct:1 },
+    { tag:"Português", q:"A frase 'O relógio da praça marca as horas, mas não conta o tempo perdido' utiliza principalmente qual figura de linguagem?", opts:["Hipérbole","Eufemismo","Metáfora","Ironia","Aliteração"], correct:2 },
+    { tag:"Português", q:"Um texto que tem como objetivo principal convencer o leitor a adotar determinado ponto de vista é predominantemente:", opts:["Narrativo","Descritivo","Injuntivo","Argumentativo","Expositivo puro"], correct:3 },
+    { tag:"Português", q:"Na frase 'Fazem dois anos que ele se formou', a norma-padrão recomenda a correção:", opts:["Fazem dois anos que ele se formaram","Faz dois anos que ele se formou","Fazia dois anos que ele se formou","Fez dois anos que ele se formaram","Faziam dois anos que ele se formou"], correct:1 },
+    { tag:"Literatura", q:"O Modernismo brasileiro, especialmente na Semana de Arte de 1922, teve como uma de suas principais características:", opts:["A valorização estrita das regras do Parnasianismo","A busca por uma linguagem culta e distante da fala cotidiana","A ruptura com padrões estéticos anteriores e a valorização da identidade nacional","O retorno absoluto aos temas clássicos greco-romanos","A rejeição total de qualquer influência europeia"], correct:2 },
+    { tag:"Português", q:"Assinale a alternativa em que a vírgula foi empregada corretamente para separar uma oração intercalada:", opts:["O professor, que chegou atrasado começou a aula","O professor que chegou atrasado, começou a aula","O professor, que chegou atrasado, começou a aula","O professor que, chegou atrasado começou a aula","O professor chegou, atrasado, começou a aula"], correct:2 },
+    { tag:"Português", q:"Em um texto, o uso do conectivo 'portanto' geralmente introduz uma ideia de:", opts:["Oposição","Conclusão","Comparação","Exemplificação","Dúvida"], correct:1 },
+    { tag:"Português", q:"Um bilhete deixado na geladeira, uma bula de remédio e uma notícia de jornal são exemplos de diferentes:", opts:["Figuras de linguagem","Tipos de sujeito","Gêneros textuais","Vícios de linguagem","Funções sintáticas"], correct:2 },
+    { tag:"Português", q:"Chamamos de 'variação linguística' o fenômeno pelo qual:", opts:["Uma língua muda de nome ao atravessar fronteiras","A língua se manifesta de formas diferentes conforme região, idade, grupo social ou contexto","Apenas o vocabulário técnico de uma língua é considerado correto","Toda variação é obrigatoriamente um erro gramatical","A escrita deve sempre seguir exatamente a fala"], correct:1 },
+    { tag:"Português", q:"Na oração 'O time comemorou a vitória, orgulhoso do desempenho', o termo destacado exerce função de:", opts:["Objeto direto","Predicativo do sujeito","Adjunto adnominal","Complemento nominal","Aposto"], correct:1 }
+  ],
+  humanas: [
+    { tag:"História", q:"Um dos principais impactos sociais da Revolução Industrial no século XIX foi:", opts:["A redução do êxodo rural","O fortalecimento exclusivo da nobreza feudal","O crescimento acelerado das cidades e a formação do proletariado urbano","O fim total do trabalho assalariado","A eliminação imediata das desigualdades sociais"], correct:2 },
+    { tag:"Geografia", q:"O território brasileiro está dividido em quantos fusos horários oficiais atualmente?", opts:["Um","Dois","Três","Quatro","Cinco"], correct:1 },
+    { tag:"Filosofia", q:"O método socrático de investigação filosófica é conhecido por incentivar o interlocutor a:", opts:["Aceitar sem questionar as opiniões dos mais velhos","Memorizar textos sagrados","Refletir criticamente por meio de perguntas sucessivas até reconhecer suas contradições","Repetir fórmulas matemáticas prontas","Evitar qualquer forma de diálogo público"], correct:2 },
+    { tag:"Sociologia", q:"O conceito sociológico de 'anomia', desenvolvido por Émile Durkheim, refere-se a:", opts:["O excesso de regras sociais rígidas","Um estado de enfraquecimento ou ausência de normas que orientam o comportamento social","A união excessiva entre os indivíduos de um grupo","Um tipo de governo autoritário","A ausência total de instituições religiosas"], correct:1 },
+    { tag:"História", q:"Durante a Era Vargas (1930-1945), uma medida marcante no campo trabalhista foi:", opts:["A extinção da CLT","A criação de leis trabalhistas e da Consolidação das Leis do Trabalho (CLT)","A proibição de qualquer sindicato","O fim do voto para os trabalhadores urbanos","A privatização total da previdência"], correct:1 },
+    { tag:"História", q:"A Guerra Fria (1947-1991) caracterizou-se principalmente pela disputa de influência global entre:", opts:["Brasil e Argentina","Estados Unidos e União Soviética","França e Alemanha","China e Japão","Reino Unido e Índia"], correct:1 },
+    { tag:"Geografia", q:"O processo de urbanização acelerada e desordenada em países em desenvolvimento costuma estar associado a:", opts:["Redução da demanda por moradia","Diminuição da desigualdade social automaticamente","Formação de periferias e déficit de infraestrutura urbana","Extinção completa da zona rural","Aumento imediato da qualidade de vida de toda a população"], correct:2 },
+    { tag:"História", q:"Um dos ideais centrais difundidos pela Revolução Francesa (1789) foi:", opts:["Manutenção dos privilégios do clero e da nobreza","Liberdade, igualdade e fraternidade entre os cidadãos","Retorno ao sistema feudal","Fortalecimento do direito divino dos reis","Isolamento total da França do restante da Europa"], correct:1 },
+    { tag:"Sociologia", q:"Em sociologia, o conceito de 'cultura' refere-se, de forma ampla, a:", opts:["Apenas às obras de arte eruditas de um país","O conjunto de valores, crenças, costumes e práticas compartilhados por um grupo social","Exclusivamente à língua falada por um povo","Somente às tradições religiosas de uma sociedade","Um conceito aplicável apenas a sociedades antigas"], correct:1 },
+    { tag:"Atualidades", q:"A Constituição Federal de 1988 é frequentemente chamada de 'Constituição Cidadã' porque:", opts:["Restringiu direitos sociais em relação às constituições anteriores","Ampliou significativamente os direitos individuais, sociais e políticos dos cidadãos","Extinguiu o voto direto no Brasil","Concentrou todo o poder no Executivo","Não previu direitos trabalhistas"], correct:1 }
+  ],
+  natureza: [
+    { tag:"Biologia", q:"A fotossíntese é o processo pelo qual as plantas convertem, principalmente, luz solar, água e gás carbônico em:", opts:["Oxigênio e proteínas apenas","Glicose e oxigênio","Nitrogênio e água","Apenas calor","Sal e minerais"], correct:1 },
+    { tag:"Química", q:"Uma ligação química formada pelo compartilhamento de elétrons entre átomos, como ocorre na molécula de água (H₂O), é chamada de:", opts:["Ligação iônica","Ligação metálica","Ligação covalente","Ligação de van der Waals apenas","Ligação nuclear"], correct:2 },
+    { tag:"Física", q:"Segundo a Primeira Lei de Newton (Lei da Inércia), um corpo em repouso ou em movimento retilíneo uniforme tende a:", opts:["Acelerar espontaneamente","Permanecer nesse estado, a menos que uma força resultante atue sobre ele","Parar após alguns segundos automaticamente","Mudar de direção sem motivo aparente","Perder massa com o tempo"], correct:1 },
+    { tag:"Biologia", q:"Nas Leis de Mendel, o cruzamento entre dois indivíduos heterozigotos (Aa x Aa) para uma característica tende a gerar, na proporção esperada, descendentes na razão genotípica de:", opts:["1 AA : 2 Aa : 1 aa","4 AA : 0 Aa : 0 aa","1 AA : 1 aa apenas","0 AA : 4 Aa : 0 aa","2 AA : 2 aa"], correct:0 },
+    { tag:"Química", q:"Uma solução com pH igual a 3 é considerada:", opts:["Fortemente básica","Neutra","Ácida","Alcalina","Impossível de existir"], correct:2 },
+    { tag:"Física", q:"A energia cinética de um corpo em movimento depende diretamente de:", opts:["Apenas da sua cor","Sua massa e sua velocidade","Somente da temperatura ambiente","Exclusivamente da força gravitacional local","Apenas do seu volume"], correct:1 },
+    { tag:"Biologia", q:"Em uma cadeia alimentar, os organismos responsáveis por produzir seu próprio alimento a partir de fontes inorgânicas são chamados de:", opts:["Consumidores primários","Decompositores","Produtores","Consumidores secundários","Predadores de topo"], correct:2 },
+    { tag:"Química", q:"Na tabela periódica, os elementos de uma mesma coluna (grupo/família) tendem a apresentar:", opts:["Propriedades químicas completamente distintas entre si","Propriedades químicas semelhantes","Sempre o mesmo número de elétrons na última camada, mas propriedades opostas","Massas atômicas idênticas","Nenhuma relação entre si"], correct:1 },
+    { tag:"Física", q:"Segundo a Lei de Ohm, em um resistor ôhmico, a tensão elétrica (U) é diretamente proporcional a:", opts:["Apenas à resistência (R)","Apenas à potência (P)","À corrente elétrica (i) multiplicada pela resistência (R)","À frequência da rede elétrica","Ao tempo de uso do circuito"], correct:2 },
+    { tag:"Biologia", q:"O processo pelo qual o corpo humano mantém relativamente constantes suas condições internas (como temperatura e pH) é chamado de:", opts:["Fotossíntese","Homeostase","Osmose reversa","Mitose","Fermentação"], correct:1 }
+  ],
+  matematica: [
+    { tag:"Matemática", q:"Um produto que custava R$200 teve um desconto de 15%. Qual o novo preço?", opts:["R$170","R$180","R$185","R$150","R$190"], correct:0 },
+    { tag:"Matemática", q:"Se 3 operários constroem um muro em 12 dias, trabalhando no mesmo ritmo, quantos dias 6 operários levariam para construir o mesmo muro?", opts:["24 dias","12 dias","6 dias","4 dias","18 dias"], correct:2 },
+    { tag:"Matemática", q:"A função f(x) = 2x + 4 tem como raiz (valor de x para o qual f(x)=0):", opts:["x = 2","x = -2","x = 4","x = -4","x = 0"], correct:1 },
+    { tag:"Matemática", q:"Qual é a área de um retângulo com 8 cm de base e 5 cm de altura?", opts:["13 cm²","40 cm²","26 cm²","35 cm²","45 cm²"], correct:1 },
+    { tag:"Matemática", q:"A média aritmética das notas 6, 7, 8 e 9 é:", opts:["7","7,5","8","6,5","7,25"], correct:1 },
+    { tag:"Matemática", q:"Em uma progressão aritmética (PA) com primeiro termo 3 e razão 4, o quinto termo é:", opts:["15","19","23","16","20"], correct:1 },
+    { tag:"Matemática", q:"Ao lançar um dado de 6 faces (não viciado) uma única vez, a probabilidade de sair um número par é:", opts:["1/6","1/3","1/2","2/3","1"], correct:2 },
+    { tag:"Matemática", q:"Em um triângulo retângulo com catetos de 3 cm e 4 cm, a medida da hipotenusa, pelo Teorema de Pitágoras, é:", opts:["5 cm","6 cm","7 cm","12 cm","25 cm"], correct:0 },
+    { tag:"Matemática", q:"O vértice da parábola representada pela função f(x) = x² - 4x + 3 está no ponto de x igual a:", opts:["x = 4","x = -2","x = 2","x = -4","x = 0"], correct:2 },
+    { tag:"Matemática", q:"Um valor de R$1.000 aplicado a juros simples de 2% ao mês, após 3 meses, rende de juros:", opts:["R$20","R$40","R$60","R$100","R$120"], correct:2 }
+  ]
+};
+
+/* =========================================================
+   TRILHAS POR CURSO
+   cada curso puxa 10 questões das matérias que mais pesam
+   nele, misturadas numa ordem natural
+   ========================================================= */
+const COURSE_TRACKS = {
+  medicina: [
+    {bank:"natureza", i:0}, {bank:"portugues", i:1}, {bank:"natureza", i:1},
+    {bank:"portugues", i:2}, {bank:"natureza", i:3}, {bank:"portugues", i:4},
+    {bank:"natureza", i:4}, {bank:"natureza", i:6}, {bank:"natureza", i:7},
+    {bank:"natureza", i:9}
+  ],
+  engenharia: [
+    {bank:"matematica", i:0}, {bank:"natureza", i:2}, {bank:"matematica", i:2},
+    {bank:"portugues", i:5}, {bank:"matematica", i:3}, {bank:"natureza", i:5},
+    {bank:"portugues", i:6}, {bank:"matematica", i:7}, {bank:"natureza", i:8},
+    {bank:"matematica", i:8}
+  ],
+  economia: [
+    {bank:"matematica", i:1}, {bank:"humanas", i:0}, {bank:"matematica", i:4},
+    {bank:"humanas", i:5}, {bank:"portugues", i:7}, {bank:"matematica", i:5},
+    {bank:"humanas", i:6}, {bank:"portugues", i:8}, {bank:"matematica", i:9},
+    {bank:"humanas", i:9}
+  ],
+  direito: [
+    {bank:"humanas", i:7}, {bank:"portugues", i:2}, {bank:"humanas", i:9},
+    {bank:"portugues", i:0}, {bank:"humanas", i:8}, {bank:"portugues", i:4},
+    {bank:"humanas", i:3}, {bank:"portugues", i:6}, {bank:"humanas", i:2},
+    {bank:"portugues", i:7}
+  ]
+};
+
+function buildCourseQuestions(courseId){
+  return COURSE_TRACKS[courseId].map(ref => SUBJECT_BANK[ref.bank][ref.i]);
+}
+
+/* =========================================================
+   STATE
+   ========================================================= */
+let state = {
+  course: null,
+  questions: [],
+  index: 0,
+  answers: []
+};
+
+/* =========================================================
+   RENDER: INTRO
+   ========================================================= */
+const areaGrid = document.getElementById("area-grid");
+COURSES.forEach((c, i) => {
+  const card = document.createElement("button");
+  card.className = "area-card";
+  card.style.setProperty("--spine", c.spine);
+  card.innerHTML = `
+    <span class="num">0${i+1}</span>
+    <span class="name">${c.name}</span>
+    <span class="desc">${c.desc}</span>
+  `;
+  card.onclick = () => startQuiz(c.id);
+  areaGrid.appendChild(card);
+});
+
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* =========================================================
+   QUIZ FLOW
+   ========================================================= */
+function startQuiz(courseId){
+  state = {
+    course: courseId,
+    questions: buildCourseQuestions(courseId),
+    index: 0,
+    answers: []
+  };
+  document.getElementById("quiz-area-label").textContent =
+    COURSES.find(c => c.id === courseId).name;
+  buildProgressDots();
+  renderQuestion();
+  showScreen("screen-quiz");
+}
+
+function buildProgressDots(){
+  const el = document.getElementById("sheet-progress");
+  el.innerHTML = "";
+  state.questions.forEach((_, i) => {
+    const dot = document.createElement("div");
+    dot.className = "sheet-dot";
+    dot.id = "dot-" + i;
+    el.appendChild(dot);
+  });
+}
+
+function updateProgressDots(){
+  state.questions.forEach((_, i) => {
+    const dot = document.getElementById("dot-" + i);
+    dot.classList.remove("done","current");
+    if(i < state.index) dot.classList.add("done");
+    if(i === state.index) dot.classList.add("current");
+  });
+}
+
+function renderQuestion(){
+  const q = state.questions[state.index];
+  document.getElementById("q-counter-text").textContent =
+    `Questão ${state.index+1} de ${state.questions.length}`;
+  document.getElementById("q-tag").textContent = q.tag;
+  document.getElementById("q-text").textContent = q.q;
+
+  const optsEl = document.getElementById("options");
+  optsEl.innerHTML = "";
+  const letters = ["A","B","C","D","E"];
+  q.opts.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerHTML = `<span class="bubble">${letters[idx]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectOption(idx, btn);
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById("btn-next").disabled = true;
+  updateProgressDots();
+}
+
+let currentSelection = null;
+
+function selectOption(idx, btnEl){
+  currentSelection = idx;
+  document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+  btnEl.classList.add("selected");
+  document.getElementById("btn-next").disabled = false;
+}
+
+document.getElementById("btn-next").addEventListener("click", () => {
+  const q = state.questions[state.index];
+  state.answers.push({
+    selected: currentSelection,
+    correct: q.correct,
+    isRight: currentSelection === q.correct,
+    tag: q.tag
+  });
+  currentSelection = null;
+
+  if(state.index < state.questions.length - 1){
+    state.index++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+});
+
+/* =========================================================
+   RESULT
+   ========================================================= */
+function showResult(){
+  const right = state.answers.filter(a => a.isRight).length;
+  const wrong = state.answers.length - right;
+
+  document.getElementById("score-big").textContent = right;
+  document.getElementById("stat-right").textContent = right;
+  document.getElementById("stat-wrong").textContent = wrong;
+
+  const tagEl = document.getElementById("score-tag");
+  const msgEl = document.getElementById("result-msg");
+  const courseName = COURSES.find(c => c.id === state.course).name;
+
+  if(right <= 3){
+    tagEl.textContent = "Nível: iniciante";
+    tagEl.className = "score-tag tag-baixo";
+    msgEl.textContent = `Você acertou ${right} de 10 no simulado de ${courseName}. Isso mostra que ainda falta uma base importante pra chegar lá — a boa notícia é que dá tempo de virar esse jogo com prática direcionada.`;
+  } else if(right <= 6){
+    tagEl.textContent = "Nível: em desenvolvimento";
+    tagEl.className = "score-tag tag-medio";
+    msgEl.textContent = `Você acertou ${right} de 10 no simulado de ${courseName}. Você já manja do assunto, mas ainda escorrega em pontos que aparecem com frequência na prova real — vale reforçar exatamente onde você travou.`;
+  } else {
+    tagEl.textContent = "Nível: avançado";
+    tagEl.className = "score-tag tag-bom";
+    msgEl.textContent = `Você acertou ${right} de 10 no simulado de ${courseName}. Mandou bem — pra chegar afiado(a) no dia da prova, o próximo passo é treinar volume, ganhar velocidade e cobrir os detalhes que ainda passam batido.`;
+  }
+
+  const sheetEl = document.getElementById("answer-sheet");
+  sheetEl.innerHTML = "";
+  const letters = ["A","B","C","D","E"];
+  state.answers.forEach((a, i) => {
+    const cell = document.createElement("div");
+    cell.className = "sheet-cell " + (a.isRight ? "right" : "wrong");
+    const shownLetter = a.selected === null ? "-" : letters[a.selected];
+    cell.innerHTML = `
+      <span class="qn">${a.tag}</span>
+      <span class="mark">${shownLetter}</span>
+    `;
+    sheetEl.appendChild(cell);
+  });
+
+  document.getElementById("offer-title").textContent =
+    `Bloco de 50 questões comentadas — ${courseName}`;
+  document.getElementById("offer-desc").textContent =
+    `Questões no mesmo estilo das que você acabou de responder, com resolução comentada passo a passo — focadas exatamente nos pontos em que você mais errou rumo a ${courseName}.`;
+
+  const crossMap = {
+    medicina: "engenharia",
+    engenharia: "economia",
+    economia: "direito",
+    direito: "medicina"
+  };
+  const nextCourse = COURSES.find(c => c.id === crossMap[state.course]);
+  document.getElementById("crosssell").innerHTML =
+    `Curioso(a) sobre outro curso? Teste também o simulado de <a onclick="startQuiz('${nextCourse.id}')">${nextCourse.name}</a>.`;
+
+  showScreen("screen-result");
+}
+
+function goToCheckout(){
+  const link = CHECKOUT_LINKS[state.course];
+  if(!link || link === "#"){
+    alert("Configure o link de checkout (Kiwify/Hotmart/Braip/Cakto) na constante CHECKOUT_LINKS do código antes de publicar.");
+    return;
+  }
+  window.location.href = link;
+}
+
+function restart(){
+  showScreen("screen-intro");
+}
+</script>
+</body>
+</html>
